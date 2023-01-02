@@ -1,0 +1,151 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Celebs;
+use App\Models\Genre;
+use App\Models\Service;
+use App\Models\Tvshow;
+use App\Models\Tag;
+
+class tvshowController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $celeb = Celebs::all();
+        $genre = Genre::all();
+        $service = Service::all();
+        $tvshow = Tvshow::all();
+        return view('admin.tvshow.index',
+        compact('celeb','genre','service','tvshow'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $this->validate($request, [
+            'title' => 'required',
+            'year' => 'required',
+            'rating' => 'required'
+        ]);
+
+        $tvshow = Tvshow::create([
+            'title'     => $request->title,
+            'type'      => $request->type,
+            'status'    => $request->status,
+            'cover'     => $request->cover,
+            'imdb'      => $request->imdb,
+            'runtime'   => $request->runtime,
+            'year'      => $request->year,
+            'rating'    => $request->rating,
+            'season'    => $request->season,
+            'episode'   => $request->episode,
+            'batchurl'  => $request->batchurl,
+            'suburl'    => $request->suburl
+        ]);
+
+        $tvshow->celebs()->attach($request->celebs);
+        $tvshow->genre()->attach($request->genre);
+        $tvshow->service()->attach($request->services);
+
+        return redirect('/Admin/TVshow')->with('success','Data added successfully!');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        $celeb = Celebs::all();
+        $genre = Genre::all();
+        $service = Service::all();
+        $tvshow = Tvshow::findorfail($id);
+        return view ('admin.tvshow.update', compact('celeb','genre','service','tvshow'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        $this->validate($request, [
+            'title' => 'required',
+            'year' => 'required',
+            'rating' => 'required'
+        ]);
+
+        $tvshow = Tvshow::findorfail($id);
+            $tvshow_data = [
+            'title'     => $request->title,
+            'type'      => $request->type,
+            'status'    => $request->status,
+            'imdb'      => $request->imdb,
+            'cover'     => $request->cover,
+            'runtime'   => $request->runtime,
+            'year'      => $request->year,
+            'rating'    => $request->rating,
+            'season'    => $request->season,
+            'episode'   => $request->episode,
+            'batchurl'  => $request->batchurl,
+            'suburl'    => $request->suburl
+            ];
+
+        $tvshow->celebs()->sync($request->celebs);
+        $tvshow->genre()->sync($request->genre);
+        $tvshow->service()->sync($request->services);
+        $tvshow->update($tvshow_data);
+        return redirect('/Admin/TVshow')->with('berhasil','Post berhasil disimpan!');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $tvshow = Tvshow::find($id);
+        $tvshow->delete();
+        return redirect('/Admin/TVshow')->with('berhasil','Data berhasil dihapus!');
+    }
+}
